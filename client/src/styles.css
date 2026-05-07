@@ -266,10 +266,14 @@ nav a:first-child {
 }
 
 .main {
+  min-width: 0;
+
   max-width: 760px;
   width: 100%;
 
   margin: 0 auto;
+
+  overflow-x: hidden;
 }
 
 header h1 {
@@ -333,24 +337,26 @@ header p button {
 
 .composer {
   display: flex;
-
+  gap: 14px;
   margin-bottom: 16px;
+  overflow: hidden;
 }
 
 .compose-body {
   flex: 1;
+  min-width: 0;
 }
 
 .composer textarea {
   width: 100%;
-  height: 80px;
+  min-height: 96px;
 
   background: transparent;
   border: 0;
 
   color: var(--text);
 
-  resize: none;
+  resize: vertical;
 
   padding: 22px;
 
@@ -360,11 +366,19 @@ header p button {
 .compose-actions {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   border-top: 1px solid var(--line);
 
-  padding:
-    12px 14px;
+  padding: 16px 22px;
+}
+
+.compose-tools {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+
+  color: var(--muted);
 }
 
 .compose-actions span {
@@ -424,14 +438,32 @@ header p button {
 }
 
 .hero-img {
+  display: block;
+
   width: 100%;
-  height: 360px;
+  height: 320px;
+
+  max-width: 100%;
+
+  margin-top: 14px;
 
   object-fit: cover;
+  object-position: center;
 
   border-radius: 14px;
-
   border: 1px solid #243650;
+}
+
+.post {
+  overflow: hidden;
+}
+
+.post,
+.composer,
+.panel,
+.side,
+.main {
+  min-width: 0;
 }
 
 .metrics {
@@ -745,4 +777,63 @@ header p button {
     width: 44px;
     height: 44px;
   }
+}
+
+.image-preview-wrap {
+  position: relative;
+  margin: 8px 22px 22px;
+}
+
+.image-preview {
+  display: block;
+
+  width: 100%;
+  height: 260px;
+
+  object-fit: cover;
+  object-position: center;
+
+  border-radius: 14px;
+  border: 1px solid #243650;
+}
+
+.remove-image {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid #ffffff33;
+  border-radius: 50%;
+
+  background: rgba(5, 11, 20, 0.78);
+  color: white;
+
+  cursor: pointer;
+}
+
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #c8d6ee;
+
+  background: #111f36;
+  border: 1px solid var(--line);
+
+  border-radius: 999px;
+
+  padding: 9px 13px;
+
+  cursor: pointer;
+}
+
+.upload-button input {
+  display: none;
 }

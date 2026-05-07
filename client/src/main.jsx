@@ -2,34 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import {
-  Home,
-  Search,
-  Bell,
-  Mail,
-  Bookmark,
-  List,
-  User,
-  Plus,
-  SlidersHorizontal,
-  Heart,
-  Repeat2,
-  MessageCircle,
-  Sparkles,
-  ShieldCheck,
-  Eye,
-  Leaf,
-  Info,
-  Image as Img,
-  MapPin,
-  BarChart3,
-  Settings,
-  MoreHorizontal,
+  Home, Search, Bell, Mail, Bookmark, List, User, Plus,
+  SlidersHorizontal, Heart, Repeat2, MessageCircle, Sparkles,
+  ShieldCheck, Eye, Leaf, Info, Image as Img, MapPin,
+  BarChart3, Settings, MoreHorizontal, X
 } from 'lucide-react';
 
 import './styles.css';
 
-const API =
-  import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const basePrefs = {
   meaningful: 65,
@@ -39,12 +20,10 @@ const basePrefs = {
   positivity: 80,
   slower_pace: 65,
   niche: 65,
-
   politics: 'show_less',
   outrage: 'show_less',
   reposts: 'show_less',
   sensitive: 'limit',
-
   sources: {
     following: 45,
     curated: 25,
@@ -79,21 +58,16 @@ function App() {
   const [modes, setModes] = useState({});
   const [active, setActive] = useState('Deep Focus');
   const [text, setText] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
 
   const rank = async (p = prefs) => {
-    const response = await fetch(
-      `${API}/api/feed/rank`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(p),
-      }
-    );
+    const response = await fetch(`${API}/api/feed/rank`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(p),
+    });
 
     const data = await response.json();
-
     setPosts(data.posts || []);
   };
 
@@ -114,7 +88,6 @@ function App() {
 
     setPrefs(next);
     setActive('Custom Mode');
-
     rank(next);
   };
 
@@ -126,57 +99,53 @@ function App() {
 
     setActive(name);
     setPrefs(next);
-
     rank(next);
   };
 
-const create = async () => {
-  const trimmed = text.trim();
+  const create = async () => {
+    const trimmed = text.trim();
 
-  if (!trimmed) return;
+    if (!trimmed && !imageUrl) return;
 
-  try {
-    const response = await fetch(`${API}/api/posts`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text: trimmed,
-        author: 'Nova',
-        handle: '@novasync',
-        tags: ['aperture', 'user post'],
-      }),
-    });
+    try {
+      const response = await fetch(`${API}/api/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: trimmed || 'Shared an image.',
+          author: 'Nova',
+          handle: '@novasync',
+          image_url: imageUrl || null,
+          tags: ['aperture', 'user post'],
+        }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok || data.error) {
-      console.error('Failed to create post:', data);
-      alert(data.error || 'Failed to create post.');
-      return;
+      if (!response.ok || data.error) {
+        console.error('Failed to create post:', data);
+        alert(data.error || 'Failed to create post.');
+        return;
+      }
+
+      const visiblePost = {
+        ...data,
+        rank_score: 'New',
+        reasons: ['You just posted this.'],
+      };
+
+      setText('');
+      setImageUrl('');
+      setPosts((currentPosts) => [visiblePost, ...currentPosts]);
+    } catch (error) {
+      console.error('Post request failed:', error);
+      alert('Could not connect to the backend.');
     }
-
-    const visiblePost = {
-      ...data,
-      rank_score: 'New',
-      reasons: ['You just posted this.'],
-    };
-
-    setText('');
-    setPosts((currentPosts) => [visiblePost, ...currentPosts]);
-  } catch (error) {
-    console.error('Post request failed:', error);
-    alert('Could not connect to the backend.');
-  }
-};
+  };
 
   return (
     <div className="app">
-      <Sidebar
-        active={active}
-        selectMode={selectMode}
-      />
+      <Sidebar active={active} selectMode={selectMode} />
 
       <main className="main">
         <Header active={active} />
@@ -184,14 +153,13 @@ const create = async () => {
         <Composer
           text={text}
           setText={setText}
+          imageUrl={imageUrl}
+          setImageUrl={setImageUrl}
           create={create}
         />
 
         {posts.map((post) => (
-          <Post
-            key={post.id}
-            post={post}
-          />
+          <Post key={post.id} post={post} />
         ))}
       </main>
 
@@ -209,38 +177,17 @@ const create = async () => {
 
 function Sidebar({ active, selectMode }) {
   const modes = [
-    [
-      'Default',
-      'Balanced discovery',
-      Sparkles,
-    ],
-    [
-      'Deep Focus',
-      'Low distraction',
-      Eye,
-    ],
-    [
-      'Creative Spark',
-      'Art, music, and ideas',
-      Sparkles,
-    ],
-    [
-      'Local Pulse',
-      'Community first',
-      MapPin,
-    ],
-    [
-      'Custom Mode',
-      'Edit preferences',
-      SlidersHorizontal,
-    ],
+    ['Default', 'Balanced discovery', Sparkles],
+    ['Deep Focus', 'Low distraction', Eye],
+    ['Creative Spark', 'Art, music, and ideas', Sparkles],
+    ['Local Pulse', 'Community first', MapPin],
+    ['Custom Mode', 'Edit preferences', SlidersHorizontal],
   ];
 
   return (
     <aside className="side">
       <div className="brand">
         <div className="orb"></div>
-
         <div>
           <b>Aperture</b>
           <span>Your feed. Your rules.</span>
@@ -258,7 +205,7 @@ function Sidebar({ active, selectMode }) {
           [User, 'Profile'],
           [Plus, 'Create'],
         ].map(([Icon, title]) => (
-          <a>
+          <a key={title}>
             <Icon size={21} />
             {title}
           </a>
@@ -267,21 +214,16 @@ function Sidebar({ active, selectMode }) {
 
       <div className="modes">
         <div className="mode-title">
-          FEED MODES
-          <Plus size={16} />
+          FEED MODES <Plus size={16} />
         </div>
 
         {modes.map(([name, desc, Icon]) => (
           <button
-            className={
-              active === name
-                ? 'mode on'
-                : 'mode'
-            }
+            key={name}
+            className={active === name ? 'mode on' : 'mode'}
             onClick={() => selectMode(name)}
           >
             <Icon size={18} />
-
             <span>
               <b>{name}</b>
               <small>{desc}</small>
@@ -292,23 +234,17 @@ function Sidebar({ active, selectMode }) {
 
       <div className="trust">
         <b>Why am I seeing this?</b>
-
-        <span>
-          Transparency builds trust.
-        </span>
-
+        <span>Transparency builds trust.</span>
         <button>Learn more</button>
       </div>
 
       <div className="me">
         <div className="avatar">🧠</div>
-
         <div>
           Nova
           <br />
           <span>@novasync</span>
         </div>
-
         <MoreHorizontal size={16} />
       </div>
     </aside>
@@ -320,32 +256,15 @@ function Header({ active }) {
     <>
       <header>
         <h1>Good morning, Nova 👋</h1>
-
         <p>
-          You’re in {active} mode
-
-          <button>Change</button>
+          You’re in {active} mode <button>Change</button>
         </p>
       </header>
 
       <section className="status">
-        <Card
-          icon={<ShieldCheck />}
-          title="Feed Health"
-          value="Excellent"
-        />
-
-        <Card
-          icon={<Eye />}
-          title="Algorithm Transparency"
-          value="High"
-        />
-
-        <Card
-          icon={<Leaf />}
-          title="Personalization"
-          value="Yours"
-        />
+        <Card icon={<ShieldCheck />} title="Feed Health" value="Excellent" />
+        <Card icon={<Eye />} title="Algorithm Transparency" value="High" />
+        <Card icon={<Leaf />} title="Personalization" value="Yours" />
       </section>
     </>
   );
@@ -355,7 +274,6 @@ function Card({ icon, title, value }) {
   return (
     <div className="status-card">
       <span>{icon}</span>
-
       <div>
         {title}
         <b>{value}</b>
@@ -364,11 +282,26 @@ function Card({ icon, title, value }) {
   );
 }
 
-function Composer({
-  text,
-  setText,
-  create,
-}) {
+function Composer({ text, setText, imageUrl, setImageUrl, create }) {
+  const handleImage = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please choose an image file.');
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setImageUrl(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="composer">
       <div className="avatar">🧠</div>
@@ -376,22 +309,38 @@ function Composer({
       <div className="compose-body">
         <textarea
           value={text}
-          onChange={(e) =>
-            setText(e.target.value)
-          }
+          onChange={(e) => setText(e.target.value)}
           placeholder="Share a thought..."
         />
 
-        <div className="compose-actions">
-          <span>
-            <Img />
-            <BarChart3 />
-            <MapPin />
-          </span>
+        {imageUrl && (
+          <div className="image-preview-wrap">
+            <img className="image-preview" src={imageUrl} alt="Upload preview" />
 
-          <button onClick={create}>
-            Post
-          </button>
+            <button
+              className="remove-image"
+              type="button"
+              onClick={() => setImageUrl('')}
+              title="Remove image"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        )}
+
+        <div className="compose-actions">
+          <div className="compose-tools">
+            <label className="upload-button">
+              <Img size={20} />
+              Add image
+              <input type="file" accept="image/*" onChange={handleImage} />
+            </label>
+
+            <BarChart3 size={20} />
+            <MapPin size={20} />
+          </div>
+
+          <button onClick={create}>Post</button>
         </div>
       </div>
     </div>
@@ -402,50 +351,36 @@ function Post({ post }) {
   return (
     <article className="post">
       <div className="post-top">
-        <div className="avatar">
-          {post.avatar}
-        </div>
+        <div className="avatar">{post.avatar}</div>
 
         <div>
           <b>{post.author}</b>
-
           <span>
-            {post.handle} ·{' '}
-            {timeAgo(post.created_at)}
+            {post.handle} · {timeAgo(post.created_at)}
           </span>
         </div>
 
-        <button className="pill">
-          ✦ Original creator
-        </button>
+        <button className="pill">✦ Original creator</button>
 
         <MoreHorizontal size={18} />
       </div>
 
-      <p className="post-text">
-        {post.text}
-      </p>
+      <p className="post-text">{post.text}</p>
 
       {post.image_url && (
-        <img
-          className="hero-img"
-          src={post.image_url}
-        />
+        <img className="hero-img" src={post.image_url} alt="Post attachment" />
       )}
 
       <div className="metrics">
         <span>
           <MessageCircle /> {post.replies}
         </span>
-
         <span>
           <Repeat2 /> {post.reposts}
         </span>
-
         <span>
           <Heart /> {post.likes}
         </span>
-
         <span>
           <Bookmark />
         </span>
@@ -454,10 +389,7 @@ function Post({ post }) {
       <div className="why">
         <div>
           <b>Why you’re seeing this</b>
-
-          <small>
-            Rank score: {post.rank_score}
-          </small>
+          <small>Rank score: {post.rank_score}</small>
         </div>
 
         {post.reasons?.map((reason, i) => (
