@@ -24,6 +24,8 @@ class PostIn(BaseModel):
     text: str
     author: str = "Nova"
     handle: str = "@novasync"
+    image_url: Optional[str] = None
+    tags: List[str] = []
 
 class Post(BaseModel):
     id: int

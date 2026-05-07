@@ -50,18 +50,66 @@ def rank_feed(prefs: Preferences):
 @app.post("/api/posts")
 def create_post(post: PostIn):
     text = post.text.strip()
+
+    if not text:
+        return {"error": "Post text cannot be empty"}
+
+    lowered = text.lower()
+
     meaningful = 75 if len(text) > 120 else 55
-    intellectual = 72 if any(w in text.lower() for w in ["algorithm", "system", "ai", "internet", "future"]) else 50
+    intellectual = 75 if any(w in lowered for w in ["algorithm", "system", "ai", "internet", "future", "social", "feed"]) else 50
+    original = 80
+    depth = 70 if len(text) > 160 else 52
+    positivity = 72 if not any(w in lowered for w in ["rage", "doom", "hate", "angry"]) else 45
+    edgy = 35 if positivity >= 60 else 65
+    niche = 70 if any(w in lowered for w in ["cyberpunk", "algorithm", "aperture", "decentralized", "open web"]) else 50
+
+    tags = post.tags or ["user post"]
+
     with connect() as conn:
         cur = conn.execute("""
-        INSERT INTO posts (author, handle, avatar, created_at, text, image_url, tags, replies, reposts, likes, source,
-          meaningful_score, entertaining_score, intellectual_score, lighthearted_score, original_score, viral_score,
-          depth_score, surface_score, positivity_score, edgy_score, slower_pace_score, fast_paced_score, niche_score, mainstream_score)
-        VALUES (?, ?, ?, ?, ?, NULL, ?, 0, 0, 1, 'following', ?, 45, ?, 35, 70, 20, 70, 25, 70, 20, 65, 25, 65, 25)
-        """, (post.author, post.handle, "🧠", datetime.utcnow().isoformat()+"Z", text, json.dumps(["new post"]), meaningful, intellectual))
+        INSERT INTO posts (
+            author, handle, avatar, created_at, text, image_url, tags,
+            replies, reposts, likes, source,
+            meaningful_score, entertaining_score,
+            intellectual_score, lighthearted_score,
+            original_score, viral_score,
+            depth_score, surface_score,
+            positivity_score, edgy_score,
+            slower_pace_score, fast_paced_score,
+            niche_score, mainstream_score,
+            politics_score, outrage_score, repost_meme_score, sensitive_score
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 'following',
+            ?, 45,
+            ?, 35,
+            ?, 25,
+            ?, 35,
+            ?, ?,
+            65, 30,
+            ?, 35,
+            0, 0, 0, 0
+        )
+        """, (
+            post.author,
+            post.handle,
+            "🧠",
+            datetime.utcnow().isoformat() + "Z",
+            text,
+            post.image_url,
+            json.dumps(tags),
+            meaningful,
+            intellectual,
+            original,
+            depth,
+            positivity,
+            edgy,
+            niche,
+        ))
+
         conn.commit()
-        new_id = cur.lastrowid
-        row = conn.execute("SELECT * FROM posts WHERE id=?", (new_id,)).fetchone()
+        row = conn.execute("SELECT * FROM posts WHERE id = ?", (cur.lastrowid,)).fetchone()
+
     return rows_to_posts([row])[0]
 
 @app.get("/api/modes")
