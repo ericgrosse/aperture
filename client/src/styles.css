@@ -349,18 +349,23 @@ header p button {
 
 .composer textarea {
   width: 100%;
-  min-height: 96px;
+
+  min-height: 72px;
+  height: 72px;
 
   background: transparent;
   border: 0;
 
   color: var(--text);
 
-  resize: vertical;
+  resize: none;
 
-  padding: 22px;
+  padding: 22px 22px 10px;
 
   outline: 0;
+
+  font-size: 18px;
+  line-height: 1.45;
 }
 
 .compose-actions {
@@ -781,7 +786,7 @@ header p button {
 
 .image-preview-wrap {
   position: relative;
-  margin: 8px 22px 22px;
+  margin: 0 22px 18px;
 }
 
 .image-preview {
